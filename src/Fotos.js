@@ -21,8 +21,8 @@ class Fotos extends Component {
   componentDidMount() {
     this.getCurrent();
     this.interval = setInterval(() => {
-      window.location.reload(true);
-  }, 15000);
+      window.location.reload(true)
+  }, 10000);
   }
 
   componentWillUnmount() {
@@ -44,17 +44,15 @@ class Fotos extends Component {
   mapImages = () => {
       const { images } = this.state;
       return images.map((image, index) => (
-        <img src={image} key={index} alt="" />
+        <img src={image} key={index} alt="" className='imagen' />
       ));
   };
 
   render() {
     return (
-      <Fragment>
-        <div id="slideshow" >
-          {this.mapImages()}
-        </div>
-      </Fragment>
+  <div className='contenedor' >
+  {this.mapImages()}
+  </div>
     );
   }
 }
