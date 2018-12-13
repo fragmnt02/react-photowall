@@ -1,100 +1,99 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment } from "react";
 import Webcam from "react-webcam";
-import firebase from 'firebase/app';
-import 'firebase/storage';
+import { graphql } from "react-apollo";
+import gql from "graphql-tag";
+
+import firebase from "firebase/app";
+import "firebase/storage";
+
+const SET_QUERY = gql`
+  mutation($photo: String) {
+    addPhoto(photo: $photo) {
+      photos
+    }
+  }
+`;
+
 var config = {
-    apiKey: "AIzaSyBuO1gZW65IzgsfxFJ5eh8lN2ChUFBsNpI",
-    authDomain: "react-photowall.firebaseapp.com",
-    databaseURL: "https://react-photowall.firebaseio.com",
-    projectId: "react-photowall",
-    storageBucket: "react-photowall.appspot.com",
-    messagingSenderId: "657234793446"
+  apiKey: "AIzaSyAcYtIXaSTezr2KZwBzWRd2g91_-SwXcmE",
+  authDomain: "react-photowall-faa12.firebaseapp.com",
+  databaseURL: "https://react-photowall-faa12.firebaseio.com",
+  projectId: "react-photowall-faa12",
+  storageBucket: "react-photowall-faa12.appspot.com",
+  messagingSenderId: "61946813215"
 };
 if (!firebase.apps.length) {
-    firebase.initializeApp(config);
+  firebase.initializeApp(config);
 }
-const storage=firebase.storage();
-
-
+const storage = firebase.storage();
 
 class Nueva extends Component {
-    constructor(props){
-        super(props);
-        this.state={
-            mensaje:'',
-            percentage:0,
-            ultima:0,
-            continuar:true,
-            proceder:false
-        }
-    }
-    componentDidMount() {
-        for (let index = 0; index < 1000; index++) {
-            if(this.state.continuar) this.getImage(index);
-        }
-        this.setState({proceder:true});
-    }
 
-    getImage=image=>{
-        storage.ref(`pictures/${image}.jpg`).getDownloadURL().then(
-            url=>{
-                var { images }= this.state;
-                images.push(url);
-                this.setState({images});
-            }
-        ).catch(err=>this.setState({continuar:false,ultima:image}));
-    }
-    setRef = webcam => {
-        this.webcam = webcam;
-    };
+  setRef = webcam => {
+    this.webcam = webcam;
+  };
 
-    capture = () => {
-        if (!this.state.proceder) {
-            alert('cargando...');
-        } else {
-            var imageSrc = this.webcam.getScreenshot();
-        console.log(imageSrc)
-        imageSrc=imageSrc.replace(/^data:image\/[a-z]+;base64,/, "");
-        const uploadTask=storage.ref(`pictures/${this.state.ultima}.jpg`).putString(imageSrc, 'base64', {contentType:'image/jpg'});
+  capture = () => {
+        var imageSrc = this.webcam.getScreenshot();
+        imageSrc = imageSrc.replace(/^data:image\/[a-z]+;base64,/, "");
+        var d= new Date();
+        const name=btoa(d.toLocaleDateString()+d.toLocaleTimeString());
+        const uploadTask=storage.ref(`pictures/${name}.jpg`).putString(imageSrc, 'base64', {contentType:'image/jpg'});
         uploadTask.on('state_changed',
         snapshot=>{},
         error=>{
             this.setState({mensaje:error.message});
         },
         ()=>{
-            storage.ref('pictures').child('1.jpg').getDownloadURL().then(url=>{alert('hecho');this.props.history.push('/nueva')});
+            storage.ref('pictures').child(`${name}.jpg`).getDownloadURL().then(url=>{
+              this.saveLink(url);
+            });
         }
         );
-        }
+  }
+
+  saveLink=photo=>{
+    this.props.addPhoto({
+      variables:{
+        photo
+      }
+    }).then(
+      res=>{
+        alert('exito');
+      }
+    );
+  }
+
+  render() {
+    const videoConstraints = {
+      width: 1280,
+      height: 720,
+      facingMode: "user"
     };
 
-    render() {
-        const videoConstraints = {
-            width: 1280,
-            height: 720,
-            facingMode: "user"
-        };
-
-        return (
-            <div style={{ height: '100vh', width: '100vw', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                {
-                    this.state.proceder
-                    ?
-                    null
-                    :
-                    <h1>Cargando... Espere.</h1>
-                }
-                <Webcam
-                    audio={false}
-                    height={350}
-                    ref={this.setRef}
-                    screenshotFormat="image/jpeg"
-                    width={350}
-                    videoConstraints={videoConstraints}
-                />
-                <button onClick={this.capture}>Capture photo</button>
-            </div>
-        );
-    }
+    return (
+      <div
+        style={{
+          height: "100vh",
+          width: "100vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <Fragment>
+          <Webcam
+            audio={false}
+            height={350}
+            ref={this.setRef}
+            screenshotFormat="image/jpeg"
+            width={350}
+            videoConstraints={videoConstraints}
+          />
+          <button onClick={this.capture}>Capture photo</button>
+        </Fragment>
+      </div>
+    );
+  }
 }
-export default Nueva;
+export default graphql(SET_QUERY, { name: 'addPhoto' })(Nueva);
