@@ -20,6 +20,13 @@ class Fotos extends Component {
 
   componentDidMount() {
     this.getCurrent();
+    this.interval = setInterval(() => {
+      window.location.reload(true);
+  }, 15000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   getCurrent = () => {
