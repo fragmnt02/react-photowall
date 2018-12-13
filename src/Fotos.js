@@ -44,8 +44,9 @@ class Fotos extends Component {
   render() {
     return (
       <Fragment>
-        <h1>FOTOS!!!!!</h1>
-        <div>{this.mapImages()}</div>
+        <div id="slideshow" >
+          {this.mapImages()}
+        </div>
       </Fragment>
     );
   }
