@@ -25,3 +25,14 @@ html, body {
       margin: 10px;
       opacity: 0.9;
   }
+
+.logo {
+
+ background:url("");
+ margin-bottom: 1px;
+ margin-left : 1px;
+ width: 200px;
+ height: 200px;
+ position: fixed;
+ bottom: 0;
+}
